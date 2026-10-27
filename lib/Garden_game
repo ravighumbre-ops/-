@@ -1,3 +1,5 @@
+
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 class GardenGame extends StatefulWidget {
@@ -11,50 +13,50 @@ class _GardenGameState extends State<GardenGame> {
   int stage = 0;
   int water = 0;
   int stars = 0;
-  bool seedPlanted = false;
-  bool watered = false;
-  bool finished = false;
 
-  final List<String> stages = [
-    'माती तयार कर',
-    'बी पेर',
-    'पाणी घाल',
-    'सूर्यप्रकाश दे',
-    'फूल उमलले!',
+  final List<String> lessons = [
+    'चला, माती तयार करूया!',
+    'छान! आता बी पेरा.',
+    'रोपाला दोन वेळा पाणी घाला.',
+    'रोपाला सूर्यप्रकाश द्या.',
+    'शाब्बास! तुझ्या बागेत फूल उमलले!',
   ];
 
-  void prepareSoil() {
-    if (stage != 0) return;
-    setState(() => stage = 1);
+  final List<String> tips = [
+    '🌱 झाडांना वाढण्यासाठी माती लागते.',
+    '🌰 बियापासून नवीन रोप उगवते.',
+    '💧 पाणी रोपाला वाढण्यास मदत करते.',
+    '☀️ सूर्यप्रकाश वनस्पतींसाठी महत्त्वाचा आहे.',
+    '🌻 झाडांची काळजी घ्या!',
+  ];
+
+  String get plantEmoji {
+    if (stage == 0) return '🟤';
+    if (stage == 1) return '🕳️';
+    if (stage == 2) return water == 0 ? '🌰' : '🌱';
+    if (stage == 3) return '🌿';
+    return '🌻';
   }
 
-  void plantSeed() {
-    if (stage != 1 || seedPlanted) return;
-    setState(() {
-      seedPlanted = true;
-      stage = 2;
-      stars++;
-    });
-  }
+  void doAction() {
+    if (stage >= 4) return;
 
-  void waterPlant() {
-    if (stage != 2) return;
     setState(() {
-      water++;
-      watered = true;
-      if (water >= 2) {
-        stage = 3;
+      if (stage == 0) {
+        stage = 1;
+      } else if (stage == 1) {
+        stage = 2;
         stars++;
+      } else if (stage == 2) {
+        water++;
+        if (water >= 2) {
+          stage = 3;
+          stars++;
+        }
+      } else if (stage == 3) {
+        stage = 4;
+        stars += 3;
       }
-    });
-  }
-
-  void giveSunlight() {
-    if (stage != 3) return;
-    setState(() {
-      stage = 4;
-      finished = true;
-      stars += 2;
     });
   }
 
@@ -63,32 +65,7 @@ class _GardenGameState extends State<GardenGame> {
       stage = 0;
       water = 0;
       stars = 0;
-      seedPlanted = false;
-      watered = false;
-      finished = false;
     });
-  }
-
-  String get plantEmoji {
-    if (!seedPlanted) return '🟤';
-    if (stage == 2) return water == 0 ? '🌰' : '🌱';
-    if (stage == 3) return '🌿';
-    return '🌻';
-  }
-
-  String get instruction {
-    switch (stage) {
-      case 0:
-        return 'चला, माती तयार करूया!';
-      case 1:
-        return 'मातीत बी पेरा.';
-      case 2:
-        return 'रोपाला दोन वेळा पाणी घाला.';
-      case 3:
-        return 'रोपाला सूर्यप्रकाश द्या.';
-      default:
-        return 'शाब्बास! तुझ्या बागेत फूल उमलले!';
-    }
   }
 
   @override
@@ -97,15 +74,28 @@ class _GardenGameState extends State<GardenGame> {
       appBar: AppBar(
         title: const Text('🌱 जादूची बाग'),
         backgroundColor: const Color(0xFFB7F0A1),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 14),
+            child: Center(
+              child: Text(
+                '⭐ $stars',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       body: Container(
-        width: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color(0xFFBDEEFF),
-              Color(0xFFE8FBD5),
-              Color(0xFFFFF0B5),
+              Color(0xFF8ADFFF),
+              Color(0xFFE5F9D6),
+              Color(0xFFFFEFB8),
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -113,70 +103,37 @@ class _GardenGameState extends State<GardenGame> {
         ),
         child: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(18),
+            padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'माझी बाग',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF236D39),
-                      ),
-                    ),
-                    Chip(
-                      avatar: const Text('⭐'),
-                      label: Text(
-                        '$stars तारे',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.92),
-                    borderRadius: BorderRadius.circular(22),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        instruction,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF51318B),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        'प्रत्येक पायरी पूर्ण करून रोप वाढव!',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ],
+                Text(
+                  lessons[stage],
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF48217F),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
+                Text(
+                  tips[stage],
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 17),
+                ),
+                const SizedBox(height: 20),
+
+                // बागेचे दृश्य
                 Container(
-                  height: 280,
+                  height: 300,
                   width: double.infinity,
                   clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(26),
+                    borderRadius: BorderRadius.circular(28),
                     gradient: const LinearGradient(
                       colors: [
-                        Color(0xFF72D5FF),
-                        Color(0xFFCBF4FF),
+                        Color(0xFF6BCFFF),
+                        Color(0xFFE1F8FF),
                       ],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
@@ -187,44 +144,58 @@ class _GardenGameState extends State<GardenGame> {
                     children: [
                       const Positioned(
                         top: 15,
-                        right: 20,
+                        right: 18,
                         child: Text(
                           '☀️',
                           style: TextStyle(fontSize: 50),
                         ),
                       ),
                       const Positioned(
-                        top: 25,
-                        left: 22,
+                        top: 28,
+                        left: 20,
                         child: Text(
                           '☁️',
-                          style: TextStyle(fontSize: 40),
+                          style: TextStyle(fontSize: 38),
+                        ),
+                      ),
+                      const Positioned(
+                        top: 72,
+                        right: 38,
+                        child: Text(
+                          '🦋',
+                          style: TextStyle(fontSize: 30),
                         ),
                       ),
                       Positioned(
-                        bottom: 0,
                         left: 0,
                         right: 0,
-                        height: 95,
+                        bottom: 0,
+                        height: 100,
                         child: Container(
                           decoration: const BoxDecoration(
-                            color: Color(0xFF8A5837),
+                            color: Color(0xFF815137),
                             borderRadius: BorderRadius.vertical(
-                              top: Radius.circular(30),
+                              top: Radius.circular(28),
                             ),
                           ),
                           child: const Center(
                             child: Text(
-                              '🌼   🌱   🌼   🌱   🌼',
-                              style: TextStyle(fontSize: 24),
+                              '🌼  🌱  🌼  🌱  🌼',
+                              style: TextStyle(fontSize: 26),
                             ),
                           ),
                         ),
                       ),
                       Positioned(
-                        bottom: 75,
+                        bottom: 78,
                         child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 400),
+                          duration: const Duration(milliseconds: 650),
+                          transitionBuilder: (child, animation) {
+                            return ScaleTransition(
+                              scale: animation,
+                              child: child,
+                            );
+                          },
                           child: Text(
                             plantEmoji,
                             key: ValueKey(plantEmoji),
@@ -232,52 +203,97 @@ class _GardenGameState extends State<GardenGame> {
                           ),
                         ),
                       ),
-                      if (stage == 2 && water == 0)
-                        const Positioned(
-                          bottom: 145,
-                          right: 40,
+                      if (stage == 2)
+                        Positioned(
+                          top: 125,
+                          left: 0,
+                          right: 0,
                           child: Text(
-                            '💧',
-                            style: TextStyle(fontSize: 30),
+                            water == 0 ? '💧' : '💧 💧',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 30),
                           ),
                         ),
-                      if (finished)
+                      if (stage == 4)
                         const Positioned(
-                          top: 85,
+                          top: 95,
+                          left: 0,
+                          right: 0,
                           child: Text(
-                            '✨ 🌻 ✨',
-                            style: TextStyle(fontSize: 36),
+                            '✨ ⭐ ✨',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 30),
                           ),
                         ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 18),
-                if (!finished) ...[
-                  if (stage == 0)
-                    actionButton(
-                      '🪴 माती तयार करा',
-                      prepareSoil,
+
+                const SizedBox(height: 20),
+
+                // प्रगती
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(5, (index) {
+                    return Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        color: index <= stage
+                            ? Colors.green
+                            : Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.green),
+                      ),
+                      child: Center(
+                        child: Text(
+                          index < stage ? '✓' : '${index + 1}',
+                          style: TextStyle(
+                            color: index <= stage
+                                ? Colors.white
+                                : Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+
+                const SizedBox(height: 20),
+
+                if (stage < 4)
+                  SizedBox(
+                    width: double.infinity,
+                    height: 60,
+                    child: ElevatedButton(
+                      onPressed: doAction,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF39A950),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: Text(
+                        [
+                          '🪴 माती तयार करा',
+                          '🌰 बी पेरा',
+                          water == 0
+                              ? '💧 पाणी घाला (१/२)'
+                              : '💧 पुन्हा पाणी घाला (२/२)',
+                          '☀️ सूर्यप्रकाश द्या',
+                        ][stage],
+                        style: const TextStyle(
+                          fontSize: 21,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
-                  if (stage == 1)
-                    actionButton(
-                      '🌰 बी पेरा',
-                      plantSeed,
-                    ),
-                  if (stage == 2)
-                    actionButton(
-                      water == 0
-                          ? '💧 पाणी घाला (१/२)'
-                          : '💧 पुन्हा पाणी घाला (२/२)',
-                      waterPlant,
-                    ),
-                  if (stage == 3)
-                    actionButton(
-                      '☀️ सूर्यप्रकाश द्या',
-                      giveSunlight,
-                    ),
-                ],
-                if (finished)
+                  ),
+
+                if (stage == 4)
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(18),
@@ -290,34 +306,37 @@ class _GardenGameState extends State<GardenGame> {
                         Text(
                           '🎉 शाब्बास बाळा!',
                           style: TextStyle(
-                            fontSize: 26,
+                            fontSize: 27,
                             fontWeight: FontWeight.bold,
                             color: Colors.deepPurple,
                           ),
                         ),
-                        SizedBox(height: 8),
+                        SizedBox(height: 10),
                         Text(
-                          'झाडांना पाणी, माती आणि सूर्यप्रकाश लागतो.',
+                          'तू रोप वाढवलेस! झाडे आपल्याला मदत करतात.',
                           textAlign: TextAlign.center,
                           style: TextStyle(fontSize: 18),
                         ),
                       ],
                     ),
                   ),
-                const SizedBox(height: 12),
+
+                const SizedBox(height: 14),
+
                 OutlinedButton.icon(
                   onPressed: restart,
                   icon: const Icon(Icons.refresh),
                   label: const Text(
-                    'पुन्हा बाग लावा',
-                    style: TextStyle(fontSize: 17),
+                    'पुन्हा खेळूया',
+                    style: TextStyle(fontSize: 18),
                   ),
                 ),
-                const SizedBox(height: 10),
+
+                const SizedBox(height: 12),
                 const Text(
                   '🌍 झाडे लावा, पृथ्वी वाचवा!',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 19,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF236D39),
                   ),
@@ -329,30 +348,4 @@ class _GardenGameState extends State<GardenGame> {
       ),
     );
   }
-
-  Widget actionButton(String label, VoidCallback action) {
-    return SizedBox(
-      width: double.infinity,
-      height: 58,
-      child: ElevatedButton(
-        onPressed: action,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF5AB85B),
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-          ),
-        ),
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    );
-  }
 }
-
